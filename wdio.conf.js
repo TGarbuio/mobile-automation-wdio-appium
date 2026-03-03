@@ -20,7 +20,12 @@ exports.config = {
         'appium:deviceName': 'emulator-5554',
         'appium:automationName': 'UiAutomator2',
         'appium:app': path.join(process.cwd(), 'app', 'android', 'Android-NativeDemoApp-0.4.0.apk'),
+        'appium:appPackage': 'com.wdiodemoapp',
+        'appium:appActivity': 'com.wdiodemoapp.SplashActivity',
         'appium:autoGrantPermissions': true,
+        'appium:noReset': false,
+        'appium:fullReset': false,
+        'appium:newCommandTimeout': 300,
     }],
     
     // ===================
@@ -74,6 +79,18 @@ exports.config = {
     // =====
     // Hooks
     // =====
+    onPrepare: function (config, capabilities) {
+        // Limpar allure-results antes de cada execução para evitar acúmulo de dados
+        const fs = require('fs');
+        const path = require('path');
+        const allureResultsPath = path.join(process.cwd(), 'allure-results');
+        
+        if (fs.existsSync(allureResultsPath)) {
+            fs.rmSync(allureResultsPath, { recursive: true, force: true });
+            console.log('✓ Allure results limpo com sucesso!');
+        }
+    },
+    
     beforeSession: function (config, capabilities, specs) {
         console.log('=== Starting Test Session ===');
     },

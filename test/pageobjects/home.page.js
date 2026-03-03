@@ -9,15 +9,15 @@ class HomePage {
      * Selectores dos elementos da Home
      */
     get homeTab() {
-        return $('~Home');
+        return $('//*[@content-desc="Home"]');
     }
 
     get appLogo() {
-        return $('~WebdriverIO logo');
+        return $('//*[@content-desc="WebdriverIO logo"]');
     }
 
     get supportVideosButton() {
-        return $('~Support videos');
+        return $('//*[@content-desc="Support videos"]');
     }
 
     /**

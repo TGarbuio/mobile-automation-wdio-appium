@@ -8,27 +8,27 @@ class SignUpPage {
      * Selectores dos elementos da tela de Sign Up
      */
     get signUpTab() {
-        return $('~Sign up');
+        return $('//*[@content-desc="button-sign-up-container"]');
     }
 
     get emailInput() {
-        return $('~input-email');
+        return $('//*[@content-desc="input-email"]');
     }
 
     get passwordInput() {
-        return $('~input-password');
+        return $('//*[@content-desc="input-password"]');
     }
 
     get repeatPasswordInput() {
-        return $('~input-repeat-password');
+        return $('//*[@content-desc="input-repeat-password"]');
     }
 
     get signUpButton() {
-        return $('~button-SIGN UP');
+        return $('//*[@content-desc="button-SIGN UP"]');
     }
 
     get successMessage() {
-        return $('//*[@resource-id="android:id/message"]');
+        return $('//*[@class="android.widget.TextView" and contains(@text, "Success")]');
     }
 
     get okButton() {
@@ -39,7 +39,17 @@ class SignUpPage {
      * Navega para a aba de Sign Up
      */
     async goToSignUpTab() {
-        await BasePage.clickElement(this.signUpTab);
+        // Na tela inicial, clicar no Login tab (que também dá acesso ao Sign up)
+        const loginTab = $('//*[@content-desc="Login"]');
+        try {
+            await BasePage.clickElement(loginTab);
+        } catch (e) {
+            // Se já estams na tela de login, continuar
+        }
+        
+        // Agora clicar no botão "Sign up" dentro da tela de login
+        const signUpButton = $('//*[@text="Sign up"]');
+        await BasePage.clickElement(signUpButton);
     }
 
     /**

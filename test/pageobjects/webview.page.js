@@ -8,15 +8,15 @@ class WebViewPage {
      * Selectores dos elementos da tela de WebView
      */
     get webViewTab() {
-        return $('~Webview');
+        return $('//*[@content-desc="Webview"]');
     }
 
     get urlInput() {
-        return $('~urlInput');
+        return $('//*[@content-desc="urlInput"]');
     }
 
     get goToSiteButton() {
-        return $('~goToSiteButton');
+        return $('//*[@content-desc="goToSiteButton"]');
     }
 
     /**
