@@ -8,27 +8,27 @@ class LoginPage {
      * Selectores dos elementos da tela de Login
      */
     get loginTab() {
-        return $('~Login');
+        return $('//*[@content-desc="Login"]');
     }
 
     get emailInput() {
-        return $('~input-email');
+        return $('//*[@content-desc="input-email"]');
     }
 
     get passwordInput() {
-        return $('~input-password');
+        return $('//*[@content-desc="input-password"]');
     }
 
     get loginButton() {
-        return $('~button-LOGIN');
+        return $('//*[@content-desc="button-LOGIN"]');
     }
 
     get signUpTab() {
-        return $('~Sign up');
+        return $('//*[@content-desc="button-sign-up-container"]');
     }
 
     get successMessage() {
-        return $('//*[@resource-id="android:id/message"]');
+        return $('//*[@class="android.widget.TextView" and contains(@text, "You are logged")]');
     }
 
     get errorMessage() {

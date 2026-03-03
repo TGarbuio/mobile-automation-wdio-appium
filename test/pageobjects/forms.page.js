@@ -8,35 +8,35 @@ class FormsPage {
      * Selectores dos elementos da tela de Forms
      */
     get formsTab() {
-        return $('~Forms');
+        return $('//*[@content-desc="Forms"]');
     }
 
     get inputField() {
-        return $('~text-input');
+        return $('//*[@content-desc="text-input"]');
     }
 
     get inputResult() {
-        return $('~input-text-result');
+        return $('//*[@content-desc="input-text-result"]');
     }
 
     get switchElement() {
-        return $('~switch');
+        return $('//*[@content-desc="switch"]');
     }
 
     get switchResult() {
-        return $('~switch-text');
+        return $('//*[@content-desc="switch-text"]');
     }
 
     get dropdownButton() {
-        return $('~Dropdown');
+        return $('//*[@content-desc="Dropdown"]');
     }
 
     get activeButton() {
-        return $('~button-Active');
+        return $('//*[@content-desc="button-Active"]');
     }
 
     get inactiveButton() {
-        return $('button-Inactive');
+        return $('//*[@content-desc="button-Inactive"]');
     }
 
     /**

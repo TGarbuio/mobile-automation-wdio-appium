@@ -8,7 +8,7 @@ class SwipePage {
      * Selectores dos elementos da tela de Swipe
      */
     get swipeTab() {
-        return $('~Swipe');
+        return $('//*[@content-desc="Swipe"]');
     }
 
     get carouselContainer() {
@@ -16,7 +16,7 @@ class SwipePage {
     }
 
     get logoImage() {
-        return $('~WebdriverIO logo');
+        return $('//*[@content-desc="WebdriverIO logo"]');
     }
 
     get cardTitle() {
