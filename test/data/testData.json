@@ -1,0 +1,64 @@
+{
+  "validUsers": [
+    {
+      "email": "user1@test.com",
+      "password": "Test@123"
+    },
+    {
+      "email": "user2@test.com",
+      "password": "Test@456"
+    },
+    {
+      "email": "user3@test.com",
+      "password": "Test@789"
+    }
+  ],
+  "invalidEmails": [
+    {
+      "email": "invalid.email",
+      "password": "Test@123",
+      "expectedError": "valid email"
+    },
+    {
+      "email": "@test.com",
+      "password": "Test@123",
+      "expectedError": "valid email"
+    },
+    {
+      "email": "test@",
+      "password": "Test@123",
+      "expectedError": "valid email"
+    }
+  ],
+  "signUpData": [
+    {
+      "email": "newuser1@test.com",
+      "password": "Test@111",
+      "repeatPassword": "Test@111"
+    },
+    {
+      "email": "newuser2@test.com",
+      "password": "Test@222",
+      "repeatPassword": "Test@222"
+    }
+  ],
+  "passwordMismatch": [
+    {
+      "email": "user@test.com",
+      "password": "Test@123",
+      "repeatPassword": "Test@456",
+      "expectedError": "not match"
+    }
+  ],
+  "formInputs": [
+    {
+      "text": "WebdriverIO"
+    },
+    {
+      "text": "Appium Automation"
+    },
+    {
+      "text": "Mobile Testing"
+    }
+  ]
+}

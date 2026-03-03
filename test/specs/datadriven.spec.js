@@ -1,0 +1,61 @@
+const LoginPage = require('../pageobjects/login.page');
+const SignUpPage = require('../pageobjects/signup.page');
+const FormsPage = require('../pageobjects/forms.page');
+const testData = require('../data/testData.json');
+const allure = require('@wdio/allure-reporter').default;
+
+describe('Data-Driven - Testes com múltiplos conjuntos de dados', () => {
+    
+    describe('Login com múltiplos usuários válidos', () => {
+        testData.validUsers.forEach((user, index) => {
+            it(`CT14.${index + 1} - Deve fazer login com usuário ${user.email}`, async () => {
+                allure.addFeature('Data-Driven Login');
+                allure.addSeverity('critical');
+                allure.addTestId(`CT14.${index + 1}`);
+                allure.addDescription(`Login com dados do conjunto ${index + 1}`);
+
+                await LoginPage.login(user.email, user.password);
+                
+                const alertMessage = await LoginPage.getAlertMessage();
+                expect(alertMessage).to.include('Success');
+                
+                await LoginPage.dismissAlert();
+            });
+        });
+    });
+
+    describe('Validação de emails inválidos', () => {
+        testData.invalidEmails.forEach((data, index) => {
+            it(`CT15.${index + 1} - Deve rejeitar email inválido: ${data.email}`, async () => {
+                allure.addFeature('Data-Driven Validation');
+                allure.addSeverity('high');
+                allure.addTestId(`CT15.${index + 1}`);
+                allure.addDescription(`Valida email inválido: ${data.email}`);
+
+                await LoginPage.login(data.email, data.password);
+                
+                const alertMessage = await LoginPage.getAlertMessage();
+                expect(alertMessage).to.include(data.expectedError);
+                
+                await LoginPage.dismissAlert();
+            });
+        });
+    });
+
+    describe('Preenchimento de formulário com múltiplos valores', () => {
+        testData.formInputs.forEach((data, index) => {
+            it(`CT16.${index + 1} - Deve preencher formulário com: ${data.text}`, async () => {
+                allure.addFeature('Data-Driven Forms');
+                allure.addSeverity('medium');
+                allure.addTestId(`CT16.${index + 1}`);
+                allure.addDescription(`Preenche formulário com: ${data.text}`);
+
+                await FormsPage.goToFormsTab();
+                await FormsPage.fillInputField(data.text);
+                
+                const result = await FormsPage.getInputResult();
+                expect(result).to.equal(data.text);
+            });
+        });
+    });
+});
