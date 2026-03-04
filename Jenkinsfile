@@ -53,7 +53,7 @@ pipeline {
         echo 'Iniciando emulador Android...'
         script {
           bat 'start "" /B "%ANDROID_HOME%\\emulator\\emulator.exe" -avd %AVD_NAME% -no-snapshot-load -no-audio -no-boot-anim'
-          bat 'powershell -NoProfile -Command "$boot=''''; while ($boot -ne ''1'') { Start-Sleep -Seconds 5; $boot = (& adb shell getprop sys.boot_completed 2>$null).Trim() }; Write-Host ''Emulador pronto''"'
+          bat '''powershell -NoProfile -Command "while ((adb shell getprop sys.boot_completed 2>$null).Trim() -ne '1') { Start-Sleep -Seconds 5 }; Write-Host 'Emulador pronto'"'''
           bat 'adb devices'
         }
       }
