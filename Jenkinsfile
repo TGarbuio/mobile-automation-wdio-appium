@@ -40,12 +40,16 @@ pipeline {
         bat 'adb version'
       }
     }
-
+    
     stage('Install Appium Driver') {
       steps {
-        echo 'Instalando Appium UiAutomator2 Driver...'
-        bat 'npx appium driver install uiautomator2'
-      }
+        echo 'Garantindo Appium UiAutomator2 Driver...'
+        script {
+        // tenta instalar; se já existir, faz update
+            bat 'npx appium driver install uiautomator2 || npx appium driver update uiautomator2'
+            bat 'npx appium driver list --installed'
+            }
+        }
     }
 
     stage('Start Android Emulator') {
