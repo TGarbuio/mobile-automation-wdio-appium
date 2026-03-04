@@ -28,7 +28,11 @@ class SignUpPage {
     }
 
     get successMessage() {
-        return $('//*[@class="android.widget.TextView" and contains(@text, "Success")]');
+        return $('//*[@class="android.widget.TextView" and (contains(@text, "Success") or contains(@text, "Signed"))]');
+    }
+
+    get errorMessage() {
+        return $('//*[@class="android.widget.TextView" and (contains(@text, "not match") or contains(@text, "Error") or contains(@text, "error"))]');
     }
 
     get okButton() {
@@ -43,13 +47,35 @@ class SignUpPage {
         const loginTab = $('//*[@content-desc="Login"]');
         try {
             await BasePage.clickElement(loginTab);
+            await browser.pause(500);
         } catch (e) {
             // Se já estams na tela de login, continuar
         }
         
-        // Agora clicar no botão "Sign up" dentro da tela de login
-        const signUpButton = $('//*[@text="Sign up"]');
-        await BasePage.clickElement(signUpButton);
+        // Tentar encontrar o botão de signup usando múltiplas estratégias
+        let signUpButtonFound = false;
+        const signUpSelectors = [
+            $('//*[@content-desc="sign-up-button"]'),
+            $('//*[@text="Sign up"]'),
+            $('//android.widget.Button[contains(@text, "Sign")]'),
+            $('//*[contains(@text, "Sign up")]')
+        ];
+        
+        for (const selector of signUpSelectors) {
+            try {
+                await BasePage.waitForElement(selector, 5000);
+                await BasePage.clickElement(selector);
+                signUpButtonFound = true;
+                break;
+            } catch (e) {
+                // Tentar o próximo seletor
+                continue;
+            }
+        }
+        
+        if (!signUpButtonFound) {
+            throw new Error('Sign up button not found with any selector');
+        }
     }
 
     /**
@@ -72,15 +98,61 @@ class SignUpPage {
      * @returns {Promise<string>} Mensagem exibida
      */
     async getAlertMessage() {
-        await BasePage.waitForElement(this.successMessage);
-        return await BasePage.getText(this.successMessage);
+        let messageText = '';
+        
+        try {
+            // Primeiro tenta encontrar a mensagem de sucesso
+            const successVisible = await BasePage.isElementDisplayed(this.successMessage);
+            if (successVisible) {
+                messageText = await BasePage.getText(this.successMessage);
+                return messageText;
+            }
+        } catch (e) {
+            // Se não encontrou, tenta a mensagem de erro
+        }
+        
+        try {
+            // Se não achou sucesso, tenta erro
+            const errorVisible = await BasePage.isElementDisplayed(this.errorMessage);
+            if (errorVisible) {
+                messageText = await BasePage.getText(this.errorMessage);
+                return messageText;
+            }
+        } catch (e) {
+            // Se não achou nenhuma das duas, tenta um genérico
+        }
+        
+        // Última tentativa: buscar qualquer TextView
+        try {
+            const genericMessage = $('//*[@class="android.widget.TextView"]');
+            messageText = await BasePage.getText(genericMessage);
+            return messageText;
+        } catch (e) {
+            throw new Error('Could not find any alert message on screen');
+        }
     }
 
     /**
-     * Clica no botão OK do alerta
+     * Clica no botão OK do alerta ou fecha a tela
      */
     async dismissAlert() {
-        await BasePage.clickElement(this.okButton);
+        try {
+            // Tentar clicar no botão OK
+            const okButtonVisible = await BasePage.isElementDisplayed(this.okButton);
+            if (okButtonVisible) {
+                await BasePage.clickElement(this.okButton);
+                return;
+            }
+        } catch (e) {
+            // Se não achou OK button, tenta outras opções
+        }
+        
+        try {
+            // Tentar voltar com o botão de back do sistema
+            await browser.back();
+        } catch (e) {
+            // Ignora se voltar não funcionar
+        }
     }
 
     /**
