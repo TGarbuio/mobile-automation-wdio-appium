@@ -64,8 +64,27 @@ class LoginPage {
      * @returns {Promise<string>} Mensagem exibida
      */
     async getAlertMessage() {
-        await BasePage.waitForElement(this.successMessage);
-        return await BasePage.getText(this.successMessage);
+        // Tenta encontrar mensagem de sucesso primeiro
+        try {
+            await BasePage.waitForElement(this.successMessage);
+            return await BasePage.getText(this.successMessage);
+        } catch (error) {
+            // Se não encontrou sucesso, tenta mensagem de erro
+            try {
+                await BasePage.waitForElement(this.errorMessage);
+                return await BasePage.getText(this.errorMessage);
+            } catch (innerError) {
+                // Última tentativa: procura qualquer TextView com mensagem
+                try {
+                    const genericAlert = $('//*[@resource-id="android:id/alertTitle"]');
+                    await genericAlert.waitForDisplayed({ timeout: 3000 });
+                    return await genericAlert.getText();
+                } catch (finalError) {
+                    console.log('Nenhuma mensagem de alerta encontrada');
+                    return '';
+                }
+            }
+        }
     }
 
     /**
