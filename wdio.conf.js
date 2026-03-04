@@ -102,8 +102,32 @@ exports.config = {
     },
     
     afterTest: async function(test, context, { error, result, duration, passed, retries }) {
+        // Tirar screenshot em caso de falha
         if (error) {
-            await driver.takeScreenshot();
+            try {
+                const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
+                const screenshotPath = `./screenshots/${test.title}-${timestamp}.png`;
+                
+                // Criar diretório se não existir
+                const fs = require('fs');
+                const path = require('path');
+                const dir = path.dirname(screenshotPath);
+                if (!fs.existsSync(dir)) {
+                    fs.mkdirSync(dir, { recursive: true });
+                }
+                
+                // Tirar screenshot e salvar
+                const screenshot = await driver.takeScreenshot();
+                fs.writeFileSync(screenshotPath, screenshot, 'base64');
+                
+                // Attachar ao Allure Report
+                const allure = require('@wdio/allure-reporter').default;
+                allure.addAttachment('Screenshot de Erro', Buffer.from(screenshot, 'base64'), 'image/png');
+                
+                console.log(`📸 Screenshot capturado: ${screenshotPath}`);
+            } catch (err) {
+                console.error('Erro ao capturar screenshot:', err);
+            }
         }
     },
     
