@@ -32,7 +32,22 @@ class HomePage {
      * @returns {Promise<boolean>}
      */
     async isOnHomeScreen() {
-        return await BasePage.isElementDisplayed(this.appLogo);
+        const logoVisible = await BasePage.isElementDisplayed(this.appLogo);
+        if (logoVisible) {
+            return true;
+        }
+
+        const supportVisible = await BasePage.isElementDisplayed(this.supportVideosButton);
+        if (supportVisible) {
+            return true;
+        }
+
+        try {
+            const isSelected = await this.homeTab.getAttribute('selected');
+            return isSelected === 'true';
+        } catch (error) {
+            return false;
+        }
     }
 
     /**

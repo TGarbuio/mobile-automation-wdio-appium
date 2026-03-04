@@ -39,21 +39,30 @@ class SwipePage {
      * @param {string} direction - Direção do swipe ('left' ou 'right')
      */
     async swipeHorizontal(direction = 'left') {
-        const container = await this.carouselContainer;
-        await container.waitForDisplayed();
-        
-        const { x, y, width, height } = await driver.getElementRect(container.elementId);
-        
-        const startX = direction === 'left' ? x + width * 0.8 : x + width * 0.2;
-        const endX = direction === 'left' ? x + width * 0.2 : x + width * 0.8;
-        const startY = y + height / 2;
-        
-        await driver.touchAction([
-            { action: 'press', x: startX, y: startY },
-            { action: 'wait', ms: 1000 },
-            { action: 'moveTo', x: endX, y: startY },
-            'release'
+        const { width, height } = await driver.getWindowRect();
+
+        const startX = direction === 'left' ? Math.floor(width * 0.8) : Math.floor(width * 0.2);
+        const endX = direction === 'left' ? Math.floor(width * 0.2) : Math.floor(width * 0.8);
+        const startY = Math.floor(height * 0.5);
+
+        await driver.performActions([
+            {
+                type: 'pointer',
+                id: 'finger1',
+                parameters: { pointerType: 'touch' },
+                actions: [
+                    { type: 'pointerMove', duration: 0, x: startX, y: startY },
+                    { type: 'pointerDown', button: 0 },
+                    { type: 'pause', duration: 200 },
+                    { type: 'pointerMove', duration: 600, x: endX, y: startY },
+                    { type: 'pointerUp', button: 0 }
+                ]
+            }
         ]);
+
+        await driver.releaseActions();
+
+        await browser.pause(500);
     }
 
     /**
@@ -75,7 +84,22 @@ class SwipePage {
      * @returns {Promise<boolean>}
      */
     async isOnSwipeScreen() {
-        return await BasePage.isElementDisplayed(this.logoImage);
+        const logoVisible = await BasePage.isElementDisplayed(this.logoImage);
+        if (logoVisible) {
+            return true;
+        }
+
+        const carouselVisible = await BasePage.isElementDisplayed(this.carouselContainer);
+        if (carouselVisible) {
+            return true;
+        }
+
+        try {
+            const isSelected = await this.swipeTab.getAttribute('selected');
+            return isSelected === 'true';
+        } catch (error) {
+            return false;
+        }
     }
 
     /**

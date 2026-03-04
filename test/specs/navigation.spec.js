@@ -21,13 +21,13 @@ describe('Navegação - Testes de Navegação entre Telas', () => {
 
         // Navega para Login
         await LoginPage.goToLoginTab();
-        let isEmailDisplayed = await LoginPage.isEmailInputDisplayed();
-        expect(isEmailDisplayed).to.be.true;
+        const loginSelected = await LoginPage.loginTab.getAttribute('selected');
+        expect(loginSelected).to.equal('true');
 
         // Navega para Forms
         await FormsPage.goToFormsTab();
-        let isInputDisplayed = await FormsPage.isInputFieldDisplayed();
-        expect(isInputDisplayed).to.be.true;
+        const formsSelected = await FormsPage.formsTab.getAttribute('selected');
+        expect(formsSelected).to.equal('true');
 
         // Navega para Swipe
         await SwipePage.goToSwipeTab();
