@@ -230,6 +230,41 @@ Os screenshots ficam salvos em:
 
 ## 🔄 CI/CD com Jenkins
 
+### Conexão rápida Jenkins + Allure (Windows)
+
+1. **Instale os plugins no Jenkins**:
+    - Pipeline
+    - Git
+    - Allure Jenkins Plugin
+    - Email Extension (opcional)
+
+2. **Configure o Allure no Jenkins**:
+    - Vá em **Manage Jenkins > Tools**
+    - Em **Allure Commandline**, clique em **Add Allure Commandline**
+    - Selecione **Install automatically**
+
+3. **Garanta as variáveis de ambiente no agente Jenkins**:
+
+```powershell
+ANDROID_HOME=C:\Users\heloi\AppData\Local\Android\Sdk
+ANDROID_SDK_ROOT=C:\Users\heloi\AppData\Local\Android\Sdk
+JAVA_HOME=C:\Program Files\Java\jdk-11
+```
+
+4. **Crie um Pipeline Job**:
+    - Tipo: **Pipeline**
+    - SCM: GitHub do projeto
+    - Script: **Pipeline script from SCM**
+    - Script Path: `Jenkinsfile`
+
+5. **Execute o build com parâmetro de emulador**:
+    - Parâmetro: `AVD_NAME`
+    - Exemplo: `Pixel_4_API_30`
+
+6. **Confira o relatório**:
+    - Build > **Allure Report**
+    - Resultados também ficam arquivados em `allure-results/`
+
 ### Pré-requisitos no Jenkins
 
 1. **Plugins necessários**:
@@ -261,12 +296,11 @@ O pipeline executa as seguintes etapas:
 
 1. **Checkout**: Clona o repositório
 2. **Install Dependencies**: Instala dependências npm
-3. **Install Appium Driver**: Instala driver UiAutomator2
-4. **Check Android Emulator**: Verifica emuladores disponíveis
+3. **Check Environment**: Valida Node, npm, `adb` e `emulator`
+4. **Install Appium Driver**: Instala driver UiAutomator2
 5. **Start Android Emulator**: Inicia o emulador
 6. **Run Tests**: Executa os testes
-7. **Generate Allure Report**: Gera relatório Allure
-8. **Publish Report**: Publica relatório no Jenkins
+7. **Publish Report**: Publica relatório Allure no Jenkins
 
 ### Notificações
 

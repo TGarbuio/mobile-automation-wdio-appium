@@ -1,10 +1,19 @@
 pipeline {
     agent any
+
+    options {
+        timestamps()
+    }
+
+    parameters {
+        string(name: 'AVD_NAME', defaultValue: 'Pixel_4_API_30', description: 'Nome do AVD Android para execução')
+    }
     
     environment {
-        ANDROID_HOME = "${env.ANDROID_HOME}"
+        ANDROID_HOME = "${env.ANDROID_HOME ?: env.ANDROID_SDK_ROOT ?: 'C:\\Users\\heloi\\AppData\\Local\\Android\\Sdk'}"
+        ANDROID_SDK_ROOT = "${ANDROID_HOME}"
         JAVA_HOME = "${env.JAVA_HOME}"
-        PATH = "${env.PATH}:${ANDROID_HOME}/platform-tools:${ANDROID_HOME}/tools"
+        PATH = "${env.PATH};${ANDROID_HOME}\\platform-tools;${ANDROID_HOME}\\emulator;${ANDROID_HOME}\\cmdline-tools\\latest\\bin"
     }
     
     stages {
@@ -18,7 +27,18 @@ pipeline {
         stage('Install Dependencies') {
             steps {
                 echo 'Instalando dependências do projeto...'
-                bat 'npm install'
+                bat 'npm ci'
+            }
+        }
+        
+        stage('Check Environment') {
+            steps {
+                echo 'Validando ambiente Android/Node...'
+                bat 'node --version'
+                bat 'npm --version'
+                bat 'echo ANDROID_HOME=%ANDROID_HOME%'
+                bat 'where adb'
+                bat 'where emulator'
             }
         }
         
@@ -29,26 +49,17 @@ pipeline {
             }
         }
         
-        stage('Check Android Emulator') {
-            steps {
-                echo 'Verificando emuladores Android disponíveis...'
-                bat 'emulator -list-avds'
-            }
-        }
-        
         stage('Start Android Emulator') {
             steps {
                 echo 'Iniciando emulador Android...'
                 script {
                     // Inicia o emulador em background
-                    bat 'start /B emulator -avd Pixel_4_API_30 -no-snapshot-load -no-audio -no-boot-anim'
-                    
-                    // Aguarda o emulador estar pronto
-                    echo 'Aguardando emulador inicializar...'
-                    sleep(time: 60, unit: 'SECONDS')
-                    
+                    bat 'start "" /B "%ANDROID_HOME%\\emulator\\emulator.exe" -avd %AVD_NAME% -no-snapshot-load -no-audio -no-boot-anim'
+
+                    // Aguarda boot completo do Android
+                    bat '''powershell -NoProfile -Command "$boot=''; while ($boot -ne '1') { Start-Sleep -Seconds 5; $boot = (& adb shell getprop sys.boot_completed 2>$null).Trim() }; Write-Host 'Emulador pronto'"'''
+
                     // Verifica se o device está online
-                    bat 'adb wait-for-device'
                     bat 'adb devices'
                 }
             }
@@ -59,23 +70,10 @@ pipeline {
                 echo 'Executando testes de automação...'
                 script {
                     try {
-                        bat 'npm run test'
+                        bat 'npm test'
                     } catch (Exception e) {
                         echo "Testes falharam, mas continuando para gerar relatório"
                         currentBuild.result = 'UNSTABLE'
-                    }
-                }
-            }
-        }
-        
-        stage('Generate Allure Report') {
-            steps {
-                echo 'Gerando relatório Allure...'
-                script {
-                    try {
-                        bat 'npm run allure:generate'
-                    } catch (Exception e) {
-                        echo "Erro ao gerar relatório Allure: ${e.message}"
                     }
                 }
             }
@@ -98,11 +96,13 @@ pipeline {
     post {
         always {
             echo 'Pipeline finalizado'
+
+            archiveArtifacts artifacts: 'allure-results/**/*', allowEmptyArchive: true
             
             // Encerra o emulador
             script {
                 try {
-                    bat 'adb -s emulator-5554 emu kill'
+                    bat 'adb emu kill'
                 } catch (Exception e) {
                     echo "Emulador já estava encerrado"
                 }
@@ -114,50 +114,14 @@ pipeline {
         
         success {
             echo 'Testes executados com sucesso!'
-            emailext (
-                subject: "Jenkins Build SUCCESS: ${env.JOB_NAME} - ${env.BUILD_NUMBER}",
-                body: """
-                    <p>Build executado com sucesso!</p>
-                    <p><b>Job:</b> ${env.JOB_NAME}</p>
-                    <p><b>Build Number:</b> ${env.BUILD_NUMBER}</p>
-                    <p><b>Build URL:</b> ${env.BUILD_URL}</p>
-                    <p>Confira o relatório Allure para detalhes dos testes.</p>
-                """,
-                to: 'team@example.com',
-                mimeType: 'text/html'
-            )
         }
         
         failure {
             echo 'Pipeline falhou!'
-            emailext (
-                subject: "Jenkins Build FAILED: ${env.JOB_NAME} - ${env.BUILD_NUMBER}",
-                body: """
-                    <p>Build falhou!</p>
-                    <p><b>Job:</b> ${env.JOB_NAME}</p>
-                    <p><b>Build Number:</b> ${env.BUILD_NUMBER}</p>
-                    <p><b>Build URL:</b> ${env.BUILD_URL}</p>
-                    <p>Verifique os logs para mais detalhes.</p>
-                """,
-                to: 'team@example.com',
-                mimeType: 'text/html'
-            )
         }
         
         unstable {
             echo 'Build instável - alguns testes falharam'
-            emailext (
-                subject: "Jenkins Build UNSTABLE: ${env.JOB_NAME} - ${env.BUILD_NUMBER}",
-                body: """
-                    <p>Build instável - alguns testes falharam.</p>
-                    <p><b>Job:</b> ${env.JOB_NAME}</p>
-                    <p><b>Build Number:</b> ${env.BUILD_NUMBER}</p>
-                    <p><b>Build URL:</b> ${env.BUILD_URL}</p>
-                    <p>Confira o relatório Allure para detalhes dos testes.</p>
-                """,
-                to: 'team@example.com',
-                mimeType: 'text/html'
-            )
         }
     }
 }
