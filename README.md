@@ -437,6 +437,8 @@ Allure Report
 └── Gráficos
     ├── Taxa de sucesso ao longo do tempo
     └── Distribuição por categoria
+<img width="1600" height="871" alt="image" src="https://github.com/user-attachments/assets/1ca1a6cc-e89d-49f5-bed5-b352a376983c" />
+
 ```
 
 ### Screenshots Automáticos
@@ -550,6 +552,8 @@ allure-results/
 │ Jenkins > Build > Allure Report                         │
 │ Histórico salvo em artifacts                            │
 └─────────────────────────────────────────────────────────┘
+<img width="1600" height="873" alt="image" src="https://github.com/user-attachments/assets/523e2fc6-0bb0-4053-ae05-fc93a66a037c" />
+
 ```
 
 ### Configuração do Jenkins (Passo-a-Passo)
